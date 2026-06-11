@@ -33,7 +33,7 @@ def register_user(generate_email):
 
 
 @pytest.fixture
-def token_autenticado():
+def token_autentication():
     
     payload = {
         "email": "fulano@qa.com",
@@ -178,10 +178,10 @@ def test_login_success():
     assert "authorization" in body
 
 
-def test_create_product(token_autenticado):
+def test_create_product(token_autentication):
     
     headers = {
-        "Authorization": token_autenticado
+        "Authorization": token_autentication
     }
     
     name_product = f"mouse{int(time.time() * 1000)}"
