@@ -1,0 +1,84 @@
+# Ambiente virtual
+
+venv/
+.venv/
+env/
+
+# Python
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Arquivos compilados
+
+*.so
+
+# Distribuição / empacotamento
+
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Logs
+
+*.log
+
+# Pytest
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+# VS Code
+
+.vscode/
+
+# JetBrains (PyCharm)
+
+.idea/
+
+# Sistema operacional
+
+.DS_Store
+Thumbs.db
+
+# Arquivos de ambiente
+
+.env
+.env.*
+
+# Relatórios
+
+reports/
+allure-results/
+allure-report/
+
+# Jupyter Notebook
+
+.ipynb_checkpoints/
+
+# MyPy
+
+.mypy_cache/
+
+# Ruff
+
+.ruff_cache/
+
+# Arquivos temporários
+
+*.tmp
+*.bak
+*.swp
