@@ -1,240 +1,200 @@
-#from urllib import response
-
 import pytest
 import requests
 import time
 
-email = f"renan{int(time.time())}@teste.com"
-email_update = f"update{int(time.time())}@teste.com"
-bearer_token = ""
-id_usuario = ""
 BASE_URL = "https://compassuol.serverest.dev"
-produto_nome = f"mouse{int(time.time())}"
 
-@pytest.fixture()
-def setup_user():
-    global id_usuario
+
+@pytest.fixture
+def generate_email():
+    
+    return f"renan{int(time.time() * 1000)}@teste.com"
+
+
+@pytest.fixture
+def register_user(generate_email):
+    
     payload = {
         "nome": "teste da Silva",
-        "email": email,
+        "email": generate_email,
         "password": "teste",
-        "administrador": "false"
+        "administrador": "true"
     }
     response = requests.post(f"{BASE_URL}/usuarios", json=payload)
     assert response.status_code == 201
-    body = response.json()
-    id_usuario = body["_id"]
+    
+    user_date = response.json()
+    user_date["used_email"] = generate_email
+    
+    yield user_date
+    
+    requests.delete(f"{BASE_URL}/usuarios/{user_date['_id']}")
+
+
+
+@pytest.fixture
+def token_autenticado():
+    
+    payload = {
+        "email": "fulano@qa.com",
+        "password": "teste"
+    }
+    response = requests.post(f"{BASE_URL}/login", json=payload)
+    assert response.status_code == 200
+    return response.json()["authorization"]
+
 
 
 def test_list_users():
     response = requests.get(f"{BASE_URL}/usuarios")
-
     assert response.status_code == 200
-
     body = response.json()
-    
-
     assert body["quantidade"] > 0
 
-def test_return_fields():
+
+def test_if_fields_are_present():
     response = requests.get(f"{BASE_URL}/usuarios")
-
     assert response.status_code == 200
-
     body = response.json()
     
-
     assert body["quantidade"] > 0
-    assert "nome" in body["usuarios"][0]
-    assert "email" in body["usuarios"][0]
-    assert "password" in body["usuarios"][0]
-    assert "administrador" in body["usuarios"][0]
-    assert "_id" in body["usuarios"][0]
+    user = body["usuarios"][0]
     
+    fields = ["nome", "email", "password", "administrador", "_id"]
+    for field in fields:
+        assert field in user
 
 
-def test_create_user():
-    global id_usuario
+def test_create_user(generate_email):
     payload = {
         "nome": "teste da Silva",
-        "email": email,
+        "email": generate_email,
         "password": "teste",
         "administrador": "true"
-        
     }
-
-    response = requests.post(
-        f"{BASE_URL}/usuarios",
-        json=payload
-    )
-
+    response = requests.post(f"{BASE_URL}/usuarios", json=payload)
     assert response.status_code == 201
 
     body = response.json()
-
     assert body["message"] == "Cadastro realizado com sucesso"
     assert isinstance(body["_id"], str)
-    id_usuario = body["_id"]
 
 
-def test_create_user_with_duplicate_email():
+def test_create_user_with_duplicate_email(register_user):
+    
     payload = {
         "nome": "teste da Silva",
-        "email": email,
+        "email": register_user["used_email"],
         "password": "teste",
         "administrador": "false"
     }
-
-    response = requests.post(
-        f"{BASE_URL}/usuarios",
-        json=payload
-    )
-
+    response = requests.post(f"{BASE_URL}/usuarios", json=payload)
     assert response.status_code == 400
 
     body = response.json()
-
     assert body["message"] == "Este email já está sendo usado"
 
 
-def test_create_user_without_name():
+def test_create_user_without_name(generate_email):
     payload = {
-        "email": email,
+        "email": generate_email,
         "password": "teste",
         "administrador": "false"
     }
-
-    response = requests.post(
-        f"{BASE_URL}/usuarios",
-        json=payload
-    )
-
+    response = requests.post(f"{BASE_URL}/usuarios", json=payload)
     assert response.status_code == 400
 
     body = response.json()
-
     assert body["nome"] == "nome é obrigatório"
 
 
-def test_create_user_with_empty_name():
+def test_create_user_with_empty_name(generate_email):
     payload = {
         "nome": "",
-        "email": email,
+        "email": generate_email,
         "password": "teste",
         "administrador": "false"
     }
-
-    response = requests.post(
-        f"{BASE_URL}/usuarios",
-        json=payload
-    )
-
+    response = requests.post(f"{BASE_URL}/usuarios", json=payload)
     assert response.status_code == 400
 
     body = response.json()
-
     assert body["nome"] == "nome não pode ficar em branco"
     
 
-def test_get_user_by_id():
-    response = requests.get(f"{BASE_URL}/usuarios/{id_usuario}")
-
+def test_get_user_by_id(register_user):
+    
+    id_user = register_user["_id"]
+    
+    response = requests.get(f"{BASE_URL}/usuarios/{id_user}")
     assert response.status_code == 200
 
     body = response.json()
-
-    
     assert body["nome"] == "teste da Silva"
-    assert body["email"] == email
+    assert body["email"] == register_user["used_email"]
     assert body["password"] == "teste"
     assert body["administrador"] == "true"
     
 
+def test_update_user(register_user):
+    id_user = register_user["_id"]
+    email_update = f"update{int(time.time() * 1000)}@teste.com"
     
-def test_update_user():
-    global id_usuario
     payload = {
         "nome": "atualizando teste da Silva",
         "email": email_update,
         "password": "teste1211111111111111111111111111111111111111",
         "administrador": "false"
     }
-    
-    
 
-    response = requests.put(
-        f"{BASE_URL}/usuarios/{id_usuario}",
-        json=payload
-    )
-    
-
+    response = requests.put(f"{BASE_URL}/usuarios/{id_user}", json=payload)
     assert response.status_code == 200
 
     body = response.json()
-
     assert body["message"] == "Registro alterado com sucesso"
 
 
-def test_delete_user():
-    global id_usuario
+def test_delete_user(register_user):
     
-    response = requests.delete(
-        f"{BASE_URL}/usuarios/{id_usuario}"
-    )
+    id_user = register_user["_id"]
     
-
+    response = requests.delete(f"{BASE_URL}/usuarios/{id_user}")
     assert response.status_code == 200
 
     body = response.json()
-
     assert body["message"] == "Registro excluído com sucesso"
 
 
-def test_login_sucess():
-    global bearer_token
-    
+def test_login_success():
     payload = {
         "email": "fulano@qa.com",
         "password": "teste"
     }
-
-    response = requests.post(
-        f"{BASE_URL}/login",
-        json=payload
-    )
-
+    response = requests.post(f"{BASE_URL}/login", json=payload)
     assert response.status_code == 200
 
     body = response.json()
-
     assert body["message"] == "Login realizado com sucesso"
-    bearer_token = body["authorization"]
+    assert "authorization" in body
 
 
-def test_create_product():
-    global bearer_token
-
+def test_create_product(token_autenticado):
+    
     headers = {
-        "Authorization": bearer_token
+        "Authorization": token_autenticado
     }
     
+    name_product = f"mouse{int(time.time() * 1000)}"
     payload = {
-        "nome": produto_nome,
+        "nome": name_product,
         "preco": 470,
         "descricao": "Mouse",
         "quantidade": 381
     }
 
-    response = requests.post(
-        f"{BASE_URL}/produtos",
-        headers=headers,
-        json=payload
-    )
-
+    response = requests.post(f"{BASE_URL}/produtos", headers=headers, json=payload)
     assert response.status_code == 201
     
     body = response.json()
-    
     assert body["message"] == "Cadastro realizado com sucesso"
     assert isinstance(body["_id"], str)
-
