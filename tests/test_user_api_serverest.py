@@ -1,8 +1,12 @@
 import pytest
 import requests
 import time
+from dotenv import load_dotenv
+import os
 
-BASE_URL = "https://compassuol.serverest.dev"
+load_dotenv()
+
+BASE_URL = os.getenv("BASE_URL")
 
 
 @pytest.fixture

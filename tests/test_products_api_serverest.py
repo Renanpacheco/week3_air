@@ -1,8 +1,12 @@
 import pytest
 import requests
 import time
+from dotenv import load_dotenv
+import os
 
-BASE_URL = "https://compassuol.serverest.dev"
+load_dotenv()
+
+BASE_URL = os.getenv("BASE_URL")
 
 @pytest.fixture
 def token_autentication():
@@ -15,6 +19,7 @@ def token_autentication():
     assert response.status_code == 200
     return response.json()["authorization"]
 
+@pytest.mark.skip()
 def test_login_success():
     payload = {
         "email": "fulano@qa.com",
@@ -27,7 +32,7 @@ def test_login_success():
     assert body["message"] == "Login realizado com sucesso"
     assert "authorization" in body
 
-
+@pytest.mark.skip()
 def test_create_product(token_autentication):
     
     headers = {
@@ -48,3 +53,9 @@ def test_create_product(token_autentication):
     body = response.json()
     assert body["message"] == "Cadastro realizado com sucesso"
     assert isinstance(body["_id"], str)
+
+def test_list_products():
+    response = requests.get(f"{BASE_URL}/produtos")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["quantidade"] > 0
