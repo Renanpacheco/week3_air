@@ -47,3 +47,23 @@ def test_login_wrong_password():
 
     body = response.json()
     assert body["message"] == "Email e/ou senha inválidos"
+
+def test_login_without_email():
+    payload = {
+        "password": "teste"
+    }
+    response = requests.post(f"{BASE_URL}/login", json=payload)
+    assert response.status_code == 400
+
+    body = response.json()
+    assert body["email"] == "email é obrigatório"
+
+def test_login_without_password():
+    payload = {
+        "email": "fulano@qa.com"
+    }
+    response = requests.post(f"{BASE_URL}/login", json=payload)
+    assert response.status_code == 400
+
+    body = response.json()
+    assert body["password"] == "password é obrigatório"
