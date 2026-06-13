@@ -7,11 +7,6 @@ load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")
 
-'''
-* Login com senha inválida.
-* Login sem informar email.
-* Login sem informar senha.
-'''
 
 @pytest.mark.skip()
 def test_login_success():
