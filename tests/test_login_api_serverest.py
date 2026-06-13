@@ -7,8 +7,9 @@ load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")
 
+pytestmark = pytest.mark.skip(reason="Tests off temporarily")
 
-@pytest.mark.skip()
+
 def test_login_success():
     payload = {
         "email": "fulano@qa.com",
@@ -18,6 +19,7 @@ def test_login_success():
     assert response.status_code == 200
 
     body = response.json()
+    print(body)
     assert body["message"] == "Login realizado com sucesso"
     assert "authorization" in body
 

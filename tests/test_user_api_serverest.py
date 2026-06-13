@@ -41,19 +41,6 @@ def register_user(generate_email):
 
 
 
-@pytest.fixture
-def token_autentication():
-    
-    payload = {
-        "email": "fulano@qa.com",
-        "password": "teste"
-    }
-    response = requests.post(f"{BASE_URL}/login", json=payload)
-    assert response.status_code == 200
-    return response.json()["authorization"]
-
-
-
 def test_list_users():
     response = requests.get(f"{BASE_URL}/usuarios")
     assert response.status_code == 200
