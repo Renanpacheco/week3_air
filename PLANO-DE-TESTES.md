@@ -107,6 +107,7 @@ Não fazem parte deste escopo:
 
 * Realizar login com credenciais válidas.
 * Validar retorno do token.
+* Realizar login com usuário recém criado
 
 #### Cenários Negativos
 
