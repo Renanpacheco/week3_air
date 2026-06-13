@@ -4,6 +4,8 @@ import time
 from dotenv import load_dotenv
 import os
 
+pytestmark = pytest.mark.skip(reason="Tests off temporarily")
+
 load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")

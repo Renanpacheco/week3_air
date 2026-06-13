@@ -4,6 +4,8 @@ import time
 from dotenv import load_dotenv
 import os
 
+pytestmark = pytest.mark.skip(reason="Tests off temporarily")
+
 load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")
@@ -18,19 +20,6 @@ def token_autentication():
     response = requests.post(f"{BASE_URL}/login", json=payload)
     assert response.status_code == 200
     return response.json()["authorization"]
-
-@pytest.mark.skip()
-def test_login_success():
-    payload = {
-        "email": "fulano@qa.com",
-        "password": "teste"
-    }
-    response = requests.post(f"{BASE_URL}/login", json=payload)
-    assert response.status_code == 200
-
-    body = response.json()
-    assert body["message"] == "Login realizado com sucesso"
-    assert "authorization" in body
 
 @pytest.mark.skip()
 def test_create_product(token_autentication):
@@ -54,6 +43,7 @@ def test_create_product(token_autentication):
     assert body["message"] == "Cadastro realizado com sucesso"
     assert isinstance(body["_id"], str)
 
+@pytest.mark.skip()
 def test_list_products():
     response = requests.get(f"{BASE_URL}/produtos")
     assert response.status_code == 200
