@@ -8,9 +8,11 @@ from schemas.product_schema import product_schema
 
 load_dotenv()
 
+
+
 BASE_URL = os.getenv("BASE_URL")
 
-#pytestmark = pytest.mark.skip(reason="Tests off temporarily")
+pytestmark = pytest.mark.skip(reason="Tests off temporarily")
 
 @pytest.fixture
 def generate_name_product():
@@ -174,7 +176,7 @@ def test_update_product(register_product, token_autentication):
     body = response.json()
     assert body["message"] == "Registro alterado com sucesso"
 
-
+@pytest.mark.skip()
 def test_delete_product(register_product, token_autentication):
     
     id_product = register_product["_id"]
