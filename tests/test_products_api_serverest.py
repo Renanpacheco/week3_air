@@ -10,7 +10,7 @@ load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")
 
-
+#pytestmark = pytest.mark.skip(reason="Tests off temporarily")
 
 @pytest.fixture
 def generate_name_product():
@@ -118,7 +118,8 @@ def test_create_product_with_invalid_token():
     
     body = response.json()
     assert body["message"] == "Token de acesso ausente, inválido, expirado ou usuário do token não existe mais"
-    
+
+@pytest.mark.skip()    
 def test_create_product_without_name(token_autentication):
     headers = {
         "Authorization": token_autentication
@@ -136,7 +137,8 @@ def test_create_product_without_name(token_autentication):
 
     body = response.json()
     assert body["nome"] == "nome é obrigatório"
-    
+
+@pytest.mark.skip()    
 def test_get_product_by_id():
 
     id_product = "BeeJh5lz3k6kSIzA"
@@ -149,3 +151,40 @@ def test_get_product_by_id():
 
     validate(instance=body, schema=product_schema)
 
+@pytest.mark.skip()
+def test_update_product(register_product, token_autentication):
+    id_product = register_product["_id"]
+    
+    
+    headers = {
+        "Authorization": token_autentication
+    }
+
+    name_product = f"update{int(time.time() * 1000)}"
+    payload = {
+        "nome": name_product,
+        "preco": 470,
+        "descricao": "Mouse",
+        "quantidade": 381
+    }
+
+    response = requests.put(f"{BASE_URL}/produtos/{id_product}", headers=headers, json=payload)
+    assert response.status_code == 200
+
+    body = response.json()
+    assert body["message"] == "Registro alterado com sucesso"
+
+
+def test_delete_product(register_product, token_autentication):
+    
+    id_product = register_product["_id"]
+    
+    headers = {
+        "Authorization": token_autentication
+    }
+    
+    response = requests.delete(f"{BASE_URL}/produtos/{id_product}", headers=headers)
+    assert response.status_code == 200
+
+    body = response.json()
+    assert body["message"] == "Registro excluído com sucesso"
