@@ -43,9 +43,7 @@ Não fazem parte deste escopo:
 * Python 3.x
 * Pytest
 * Requests
-* Faker
 * JsonSchema (opcional)
-* Allure Reports (opcional)
 
 ### Estratégia de Dados
 
@@ -313,6 +311,6 @@ Um teste será considerado pronto quando:
 
 ---
 
-Versão: 1.0
+Versão: 1.1
 
 Autor: Renan Pacheco
