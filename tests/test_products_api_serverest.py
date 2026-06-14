@@ -3,13 +3,14 @@ import requests
 import time
 from dotenv import load_dotenv
 import os
-
+from jsonschema import validate
+from schemas.product_schema import product_schema
 
 load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")
 
-pytestmark = pytest.mark.skip(reason="Tests off temporarily")
+
 
 @pytest.fixture
 def generate_name_product():
@@ -34,7 +35,7 @@ def register_product(token_autentication, generate_name_product):
         "Authorization": token_autentication
     }
     
-    #name_product = f"mouse{int(time.time() * 1000)}"
+    
     payload = {
         "nome": generate_name_product,
         "preco": 470,
@@ -135,3 +136,16 @@ def test_create_product_without_name(token_autentication):
 
     body = response.json()
     assert body["nome"] == "nome é obrigatório"
+    
+def test_get_product_by_id():
+
+    id_product = "BeeJh5lz3k6kSIzA"
+
+    response = requests.get(f"{BASE_URL}/produtos/{id_product}")
+
+    assert response.status_code == 200
+
+    body = response.json()
+
+    validate(instance=body, schema=product_schema)
+
