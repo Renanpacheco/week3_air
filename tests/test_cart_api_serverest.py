@@ -295,3 +295,48 @@ def test_buy_non_existent_cart(token_autentication):
     body = response.json()
 
     assert body["message"] == "Não foi encontrado carrinho para esse usuário"
+    
+def test_cancel_cart(token_autentication, create_product):
+
+    headers = {
+        "Authorization": token_autentication
+    }
+    
+    product_id = create_product["_id"]
+    response = requests.get(f"{BASE_URL}/produtos/{product_id}")
+
+    stock_before = response.json()["quantidade"]
+
+    payload = {
+        "produtos": [
+            {
+                "idProduto": product_id,
+                "quantidade": 2
+            }
+        ]
+    }
+    
+    
+
+    response = requests.post(
+        f"{BASE_URL}/carrinhos",
+        headers=headers,
+        json=payload
+    )
+
+    
+    assert response.status_code == 201
+    
+    response = requests.delete(f"{BASE_URL}/carrinhos/cancelar-compra", headers=headers)
+    assert response.status_code == 200
+
+    body = response.json()
+
+    assert body["message"] == "Registro excluído com sucesso"
+    
+    response = requests.get(f"{BASE_URL}/produtos/{product_id}")
+    assert response.status_code == 200
+
+    stock_after = response.json()["quantidade"]
+
+    assert stock_after == stock_before
