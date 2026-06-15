@@ -4,6 +4,11 @@ import time
 from dotenv import load_dotenv
 import os
 
+from jsonschema import validate
+from schemas.user_schema import user_schema
+
+
+
 load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")
@@ -36,19 +41,6 @@ def register_user(generate_email):
 
 
 
-@pytest.fixture
-def token_autentication():
-    
-    payload = {
-        "email": "fulano@qa.com",
-        "password": "teste"
-    }
-    response = requests.post(f"{BASE_URL}/login", json=payload)
-    assert response.status_code == 200
-    return response.json()["authorization"]
-
-
-
 def test_list_users():
     response = requests.get(f"{BASE_URL}/usuarios")
     assert response.status_code == 200
@@ -60,7 +52,7 @@ def test_if_fields_are_present():
     response = requests.get(f"{BASE_URL}/usuarios")
     assert response.status_code == 200
     body = response.json()
-    print(body)
+    
     user = body["usuarios"][0]
     
     fields = ["nome", "email", "password", "administrador", "_id"]
@@ -75,6 +67,7 @@ def test_create_user(generate_email):
         "password": "teste",
         "administrador": "true"
     }
+    
     response = requests.post(f"{BASE_URL}/usuarios", json=payload)
     assert response.status_code == 201
 
@@ -91,6 +84,7 @@ def test_create_user_with_duplicate_email(register_user):
         "password": "teste",
         "administrador": "false"
     }
+    
     response = requests.post(f"{BASE_URL}/usuarios", json=payload)
     assert response.status_code == 400
 
@@ -124,20 +118,20 @@ def test_create_user_with_empty_name(generate_email):
     body = response.json()
     assert body["nome"] == "nome não pode ficar em branco"
     
-
 def test_get_user_by_id(register_user):
-    
+
     id_user = register_user["_id"]
-    
+
     response = requests.get(f"{BASE_URL}/usuarios/{id_user}")
+
     assert response.status_code == 200
 
     body = response.json()
-    assert body["nome"] == "teste da Silva"
-    assert body["email"] == register_user["used_email"]
-    assert body["password"] == "teste"
-    assert body["administrador"] == "true"
+
+    validate(instance=body, schema=user_schema)
+
     
+
 
 def test_update_user(register_user):
     id_user = register_user["_id"]

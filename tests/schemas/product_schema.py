@@ -1,0 +1,28 @@
+product_schema = {
+    "type": "object",
+    "required": [
+        "nome",
+        "preco",
+        "descricao",
+        "quantidade",
+        "_id"
+    ],
+    "properties": {
+        "nome": {
+            "type": "string"
+        },
+        "preco": {
+            "type": "integer"
+        },
+        "descricao": {
+            "type": "string"
+        },
+        "quantidade": {
+            "type": "integer"
+        },
+        "_id": {
+            "type": "string"
+        }
+    },
+    "additionalProperties": False
+}
