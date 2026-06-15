@@ -231,11 +231,51 @@ def test_create_cart(token_autentication, create_product):
         json=payload
     )
 
-    print(response.json())
-
     assert response.status_code == 201
 
     body = response.json()
 
     assert body["message"] == "Cadastro realizado com sucesso"
     
+@pytest.mark.skip()
+def test_buy_cart(token_autentication, create_product):
+
+    headers = {
+        "Authorization": token_autentication
+    }
+
+    payload = {
+        "produtos": [
+            {
+                "idProduto": create_product["_id"],
+                "quantidade": 2
+            }
+        ]
+    }
+
+    response = requests.post(
+        f"{BASE_URL}/carrinhos",
+        headers=headers,
+        json=payload
+    )
+
+    
+    assert response.status_code == 201
+    
+    response = requests.delete(f"{BASE_URL}/carrinhos/concluir-compra", headers=headers)
+
+    body = response.json()
+
+    assert body["message"] == "Registro excluído com sucesso"
+
+def test_buy_non_existent_cart(token_autentication):
+
+    headers = {
+        "Authorization": token_autentication
+    }
+    
+    response = requests.delete(f"{BASE_URL}/carrinhos/concluir-compra", headers=headers)
+
+    body = response.json()
+
+    assert body["message"] == "Não foi encontrado carrinho para esse usuário"
