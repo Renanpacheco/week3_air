@@ -122,6 +122,19 @@ def test_get_cart_by_id():
 
     validate(instance=body, schema=cart_schema)
 
+
+def test_get_cart_nonexistent():
+
+    
+    id_cart = "qbMqntef4iTOwWfa"
+
+    response = requests.get(f"{BASE_URL}/carrinhos/{id_cart}")
+
+    assert response.status_code == 400
+
+    body = response.json()
+    assert body["message"] == "Carrinho não encontrado"
+    
 @pytest.mark.skip()
 def test_create_cart_without_token():
     payload = {
