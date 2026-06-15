@@ -10,7 +10,7 @@ load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")
 
-@pytest.fixture
+'''@pytest.fixture
 def token_autentication():
     
     payload = {
@@ -20,6 +20,86 @@ def token_autentication():
     response = requests.post(f"{BASE_URL}/login", json=payload)
     assert response.status_code == 200
     return response.json()["authorization"]
+'''
+@pytest.fixture
+def create_product(token_autentication):
+
+    headers = {
+        "Authorization": token_autentication
+    }
+
+    product_name = f"Produto {int(time.time() * 1000)}"
+
+    payload = {
+        "nome": product_name,
+        "preco": 100,
+        "descricao": "Produto para teste",
+        "quantidade": 10
+    }
+
+    response = requests.post(
+        f"{BASE_URL}/produtos",
+        headers=headers,
+        json=payload
+    )
+
+    assert response.status_code == 201
+
+    yield response.json()
+
+    requests.delete(
+        f"{BASE_URL}/produtos/{response.json()['_id']}",
+        headers=headers
+    )
+
+@pytest.fixture
+def token_autentication(create_user):
+
+    payload = {
+        "email": create_user["email"],
+        "password": create_user["password"]
+    }
+
+    response = requests.post(
+        f"{BASE_URL}/login",
+        json=payload
+    )
+
+    assert response.status_code == 200
+
+    return response.json()["authorization"]
+
+@pytest.fixture
+def create_user():
+
+    email = f"renan{int(time.time() * 1000)}@teste.com"
+
+    payload = {
+        "nome": "Renan",
+        "email": email,
+        "password": "teste",
+        "administrador": "true"
+    }
+
+    response = requests.post(
+        f"{BASE_URL}/usuarios",
+        json=payload
+    )
+
+    assert response.status_code == 201
+
+    user = response.json()
+
+    yield {
+        "_id": user["_id"],
+        "email": email,
+        "password": "teste"
+    }
+
+    requests.delete(
+        f"{BASE_URL}/usuarios/{user['_id']}"
+    )
+
 
 @pytest.mark.skip()
 def test_list_carts():
@@ -76,7 +156,7 @@ def test_create_cart_with_invalid_token():
     body = response.json()
     assert body["message"] == "Token de acesso ausente, inválido, expirado ou usuário do token não existe mais"
 
-
+@pytest.mark.skip()
 def test_create_second_cart(token_autentication):
     
     headers = {
@@ -116,3 +196,33 @@ def test_create_cart_empty(token_autentication):
     body = response.json()
     assert body["produtos"] == "produtos é obrigatório"
 
+@pytest.mark.skip()
+def test_create_cart(token_autentication, create_product):
+
+    headers = {
+        "Authorization": token_autentication
+    }
+
+    payload = {
+        "produtos": [
+            {
+                "idProduto": create_product["_id"],
+                "quantidade": 2
+            }
+        ]
+    }
+
+    response = requests.post(
+        f"{BASE_URL}/carrinhos",
+        headers=headers,
+        json=payload
+    )
+
+    print(response.json())
+
+    assert response.status_code == 201
+
+    body = response.json()
+
+    assert body["message"] == "Cadastro realizado com sucesso"
+    
