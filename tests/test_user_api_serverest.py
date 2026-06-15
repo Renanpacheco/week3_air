@@ -7,7 +7,7 @@ import os
 from jsonschema import validate
 from schemas.user_schema import user_schema
 
-pytestmark = pytest.mark.skip(reason="Tests off temporarily")
+
 
 load_dotenv()
 

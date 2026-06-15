@@ -12,7 +12,7 @@ load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")
 
-pytestmark = pytest.mark.skip(reason="Tests off temporarily")
+
 
 @pytest.fixture
 def generate_name_product():
@@ -59,8 +59,8 @@ def register_product(token_autentication, generate_name_product):
     assert body["message"] == "Cadastro realizado com sucesso"
     assert isinstance(body["_id"], str)
 
-@pytest.mark.skip()    
-def test_create_product_with_duplicate_name(token_autentication, register_product):#remenber to get a product to test for indenpende of this test
+    
+def test_create_product_with_duplicate_name(token_autentication, register_product):
     headers = {
         "Authorization": token_autentication
     }
@@ -79,7 +79,7 @@ def test_create_product_with_duplicate_name(token_autentication, register_produc
     body = response.json()
     assert body["message"] == "Já existe produto com esse nome"
 
-@pytest.mark.skip()
+
 def test_list_products():
     response = requests.get(f"{BASE_URL}/produtos")
     assert response.status_code == 200
@@ -87,7 +87,7 @@ def test_list_products():
     assert body["quantidade"] > 0
 
 
-@pytest.mark.skip()
+
 def test_create_product_without_token():
     payload = {
         "nome": "mouse",
@@ -100,7 +100,7 @@ def test_create_product_without_token():
     body = response.json()    
     assert body["message"] == "Token de acesso ausente, inválido, expirado ou usuário do token não existe mais"
 
-@pytest.mark.skip()
+
 def test_create_product_with_invalid_token():
     
     headers = {
@@ -121,7 +121,7 @@ def test_create_product_with_invalid_token():
     body = response.json()
     assert body["message"] == "Token de acesso ausente, inválido, expirado ou usuário do token não existe mais"
 
-@pytest.mark.skip()    
+    
 def test_create_product_without_name(token_autentication):
     headers = {
         "Authorization": token_autentication
@@ -140,7 +140,7 @@ def test_create_product_without_name(token_autentication):
     body = response.json()
     assert body["nome"] == "nome é obrigatório"
 
-@pytest.mark.skip()    
+    
 def test_get_product_by_id():
 
     id_product = "BeeJh5lz3k6kSIzA"
@@ -153,7 +153,7 @@ def test_get_product_by_id():
 
     validate(instance=body, schema=product_schema)
 
-@pytest.mark.skip()
+
 def test_update_product(register_product, token_autentication):
     id_product = register_product["_id"]
     
@@ -176,7 +176,7 @@ def test_update_product(register_product, token_autentication):
     body = response.json()
     assert body["message"] == "Registro alterado com sucesso"
 
-@pytest.mark.skip()
+
 def test_delete_product(register_product, token_autentication):
     
     id_product = register_product["_id"]

@@ -7,8 +7,6 @@ load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")
 
-pytestmark = pytest.mark.skip(reason="Tests off temporarily")
-
 
 def test_login_success():
     payload = {

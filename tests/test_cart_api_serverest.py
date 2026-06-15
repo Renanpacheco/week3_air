@@ -10,17 +10,6 @@ load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")
 
-'''@pytest.fixture
-def token_autentication():
-    
-    payload = {
-        "email": "fulano@qa.com",
-        "password": "teste"
-    }
-    response = requests.post(f"{BASE_URL}/login", json=payload)
-    assert response.status_code == 200
-    return response.json()["authorization"]
-'''
 @pytest.fixture
 def create_product(token_autentication):
 
@@ -101,17 +90,17 @@ def create_user():
     )
 
 
-@pytest.mark.skip()
+
 def test_list_carts():
     response = requests.get(f"{BASE_URL}/carrinhos")
     assert response.status_code == 200
     body = response.json()
     assert body["quantidade"] > 0
 
-@pytest.mark.skip()
+
 def test_get_cart_by_id():
 
-    #id_cart = register_cart["_id"]
+    
     id_cart = "qbMqntef4iTOwWfg"
 
     response = requests.get(f"{BASE_URL}/carrinhos/{id_cart}")
@@ -122,7 +111,7 @@ def test_get_cart_by_id():
 
     validate(instance=body, schema=cart_schema)
 
-@pytest.mark.skip()
+
 def test_get_cart_nonexistent():
 
     
@@ -135,7 +124,7 @@ def test_get_cart_nonexistent():
     body = response.json()
     assert body["message"] == "Carrinho não encontrado"
     
-@pytest.mark.skip()
+
 def test_create_cart_without_token():
     payload = {
         "nome": "carrinho 024578",
@@ -148,7 +137,7 @@ def test_create_cart_without_token():
     body = response.json()    
     assert body["message"] == "Token de acesso ausente, inválido, expirado ou usuário do token não existe mais"
 
-@pytest.mark.skip()
+
 def test_create_cart_with_invalid_token():
     
     headers = {
@@ -169,31 +158,54 @@ def test_create_cart_with_invalid_token():
     body = response.json()
     assert body["message"] == "Token de acesso ausente, inválido, expirado ou usuário do token não existe mais"
 
-@pytest.mark.skip()
-def test_create_second_cart(token_autentication):
-    
+
+def test_create_second_cart(token_autentication, create_product):
+
     headers = {
         "Authorization": token_autentication
     }
-    
+
+    product_id = create_product["_id"]
+
     payload = {
         "produtos": [
             {
-                "idProduto": "2RjZPVeOIOXtTDGK",
+                "idProduto": product_id,
                 "quantidade": 2
             }
         ]
     }
 
     
-    response = requests.post(f"{BASE_URL}/carrinhos", headers=headers, json=payload)
-    assert response.status_code == 400
+    first_response = requests.post(
+        f"{BASE_URL}/carrinhos",
+        headers=headers,
+        json=payload
+    )
 
-    body = response.json()
+    assert first_response.status_code == 201
+
+    
+    second_response = requests.post(
+        f"{BASE_URL}/carrinhos",
+        headers=headers,
+        json=payload
+    )
+
+    assert second_response.status_code == 400
+
+    body = second_response.json()
+
     assert body["message"] == "Não é permitido ter mais de 1 carrinho"
 
+    
+    requests.delete(
+        f"{BASE_URL}/carrinhos/cancelar-compra",
+        headers=headers
+    )
 
-@pytest.mark.skip() 
+
+ 
 def test_create_cart_empty(token_autentication):
     headers = {
         "Authorization": token_autentication
@@ -209,7 +221,7 @@ def test_create_cart_empty(token_autentication):
     body = response.json()
     assert body["produtos"] == "produtos é obrigatório"
 
-@pytest.mark.skip()
+
 def test_create_cart(token_autentication, create_product):
 
     headers = {
@@ -283,7 +295,7 @@ def test_buy_cart(token_autentication, create_product):
     assert stock_after == stock_before - 2
     
     
-@pytest.mark.skip()
+
 def test_buy_non_existent_cart(token_autentication):
 
     headers = {
@@ -332,7 +344,7 @@ def test_cancel_cart(token_autentication, create_product):
 
     body = response.json()
 
-    assert body["message"] == "Registro excluído com sucesso"
+    assert body["message"] == "Registro excluído com sucesso. Estoque dos produtos reabastecido"
     
     response = requests.get(f"{BASE_URL}/produtos/{product_id}")
     assert response.status_code == 200
