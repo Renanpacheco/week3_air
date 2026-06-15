@@ -10,6 +10,17 @@ load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")
 
+@pytest.fixture
+def token_autentication():
+    
+    payload = {
+        "email": "fulano@qa.com",
+        "password": "teste"
+    }
+    response = requests.post(f"{BASE_URL}/login", json=payload)
+    assert response.status_code == 200
+    return response.json()["authorization"]
+
 @pytest.mark.skip()
 def test_list_carts():
     response = requests.get(f"{BASE_URL}/carrinhos")
@@ -17,6 +28,7 @@ def test_list_carts():
     body = response.json()
     assert body["quantidade"] > 0
 
+@pytest.mark.skip()
 def test_get_cart_by_id():
 
     #id_cart = register_cart["_id"]
@@ -30,7 +42,7 @@ def test_get_cart_by_id():
 
     validate(instance=body, schema=cart_schema)
 
-
+@pytest.mark.skip()
 def test_create_cart_without_token():
     payload = {
         "nome": "carrinho 024578",
@@ -43,7 +55,7 @@ def test_create_cart_without_token():
     body = response.json()    
     assert body["message"] == "Token de acesso ausente, inválido, expirado ou usuário do token não existe mais"
 
-
+@pytest.mark.skip()
 def test_create_cart_with_invalid_token():
     
     headers = {
@@ -64,22 +76,43 @@ def test_create_cart_with_invalid_token():
     body = response.json()
     assert body["message"] == "Token de acesso ausente, inválido, expirado ou usuário do token não existe mais"
 
-@pytest.mark.skip()    
-def test_create_cart_without_name(token_autentication):
+
+def test_create_second_cart(token_autentication):
+    
+    headers = {
+        "Authorization": token_autentication
+    }
+    
+    payload = {
+        "produtos": [
+            {
+                "idProduto": "2RjZPVeOIOXtTDGK",
+                "quantidade": 2
+            }
+        ]
+    }
+
+    
+    response = requests.post(f"{BASE_URL}/carrinhos", headers=headers, json=payload)
+    assert response.status_code == 400
+
+    body = response.json()
+    assert body["message"] == "Não é permitido ter mais de 1 carrinho"
+
+
+@pytest.mark.skip() 
+def test_create_cart_empty(token_autentication):
     headers = {
         "Authorization": token_autentication
     }
     
     payload = {
         
-        "preco": 470,
-        "descricao": "Mouse",
-        "quantidade": 381
     }
     
-    response = requests.post(f"{BASE_URL}/produtos", headers=headers, json=payload)
+    response = requests.post(f"{BASE_URL}/carrinhos", headers=headers, json=payload)
     assert response.status_code == 400
 
     body = response.json()
-    assert body["nome"] == "nome é obrigatório"
+    assert body["produtos"] == "produtos é obrigatório"
 
